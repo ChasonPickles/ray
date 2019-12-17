@@ -14,6 +14,8 @@
 #include "ray/gcs/callback.h"
 #include "ray/gcs/redis_context.h"
 #include "ray/protobuf/gcs.pb.h"
+#include "ray/common/scheduling/cluster_resource_scheduler.h"
+
 
 struct redisAsyncContext;
 
@@ -608,6 +610,18 @@ class DynamicResourceTable : public Hash<ClientID, ResourceTableData> {
   };
 
   virtual ~DynamicResourceTable(){};
+};
+
+class CustomTable : public Hash<ClientID, ClusterResourceScheduler> {
+public:
+    CustomTable(const std::vector<std::shared_ptr<RedisContext>> &contexts,
+                         RedisGcsClient *client)
+            : Hash(contexts, client) {
+        pubsub_channel_ = TablePubsub::NODE_RESOURCE_PUBSUB;
+        prefix_ = TablePrefix::NODE_RESOURCE;
+    };
+
+    virtual ~CustomTable(){};
 };
 
 class ObjectTable : public Set<ObjectID, ObjectTableData> {

@@ -66,6 +66,7 @@ class RAY_EXPORT RedisGcsClient : public GcsClient {
   ActorCheckpointTable &actor_checkpoint_table();
   ActorCheckpointIdTable &actor_checkpoint_id_table();
   DynamicResourceTable &resource_table();
+  CustomTable &huck_table();
   /// Used only for direct calls. Tasks submitted through the raylet transport
   /// should use Actors(), which has a requirement on the order in which
   /// entries can be appended to the log.
@@ -115,6 +116,7 @@ class RAY_EXPORT RedisGcsClient : public GcsClient {
   std::unique_ptr<ActorCheckpointTable> actor_checkpoint_table_;
   std::unique_ptr<ActorCheckpointIdTable> actor_checkpoint_id_table_;
   std::unique_ptr<DynamicResourceTable> resource_table_;
+  std::unique_ptr<CustomTable> huck_table_;
   // The following contexts write to the data shard
   std::vector<std::shared_ptr<RedisContext>> shard_contexts_;
   std::vector<std::unique_ptr<RedisAsioClient>> shard_asio_async_clients_;

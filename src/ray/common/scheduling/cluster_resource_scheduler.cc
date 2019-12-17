@@ -121,6 +121,8 @@ void ClusterResourceScheduler::AddOrUpdateNode(int64_t node_id,
   }
 }
 
+
+
 bool ClusterResourceScheduler::RemoveNode(int64_t node_id) {
   auto it = nodes_.find(node_id);
   if (it == nodes_.end()) {

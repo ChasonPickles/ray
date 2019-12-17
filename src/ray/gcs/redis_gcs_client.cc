@@ -233,6 +233,8 @@ ActorCheckpointIdTable &RedisGcsClient::actor_checkpoint_id_table() {
 
 DynamicResourceTable &RedisGcsClient::resource_table() { return *resource_table_; }
 
+CustomTable &RedisGcsClient::huck_table(){return *huck_table_;}
+
 }  // namespace gcs
 
 }  // namespace ray

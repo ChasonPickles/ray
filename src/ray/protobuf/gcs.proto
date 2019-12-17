@@ -159,6 +159,10 @@ message ResourceTableData {
   double resource_capacity = 1;
 }
 
+message HuckYou{
+
+}
+
 message GcsNodeInfo {
   // State of a node.
   enum GcsNodeState {

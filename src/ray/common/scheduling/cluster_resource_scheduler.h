@@ -96,6 +96,15 @@ class ClusterResourceScheduler {
  public:
   ClusterResourceScheduler(void){};
 
+    void ParseFromString(std::string huck){
+        ClusterResourceScheduler c;
+//    return c;
+    }
+
+    std::string SerializeAsString(){
+        return "Im an oopa loopma";
+    }
+    
   /// Constructor initializing the resources associated with the local node.
   ///
   /// \param local_node_id: ID of local node,
