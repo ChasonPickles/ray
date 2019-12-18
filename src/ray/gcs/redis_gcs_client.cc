@@ -251,24 +251,24 @@ void RedisGcsClient::HeartbeatAdded(const ClientID &client_id,
     // Locate the client id in remote client table and update available resources based on
     // the received heartbeat information.
     auto it = cluster_resource_map_.find(client_id);
-    SchedulingResources &remote_resources;
     if (it == cluster_resource_map_.end()) {
         // Haven't received the client registration for this client yet, skip this heartbeat.
         RAY_LOG(INFO) << "[HeartbeatAdded]: received heartbeat from unknown client id "
                       << client_id;
-        cluster_resource_map_[client_id] = new SchedulingResources();
-        remote_resources = cluster_resource_map_[client_id];
+        cluster_resource_map_[client_id] = SchedulingResources();
+
+        SchedulingResources &remote_resources = cluster_resource_map_[client_id];
+        remote_resources.SetAvailableResources(std::move(remote_available));
+        remote_resources.SetLoadResources(std::move(remote_load));
     }
     else{
-        remote_resources = it->second;
+        SchedulingResources &remote_resources = it->second;
+        remote_resources.SetAvailableResources(std::move(remote_available));
+        remote_resources.SetLoadResources(std::move(remote_load));
     }
-
-    remote_resources.SetAvailableResources(std::move(remote_available));
-    remote_resources.SetLoadResources(std::move(remote_load));
 }
 
 void RedisGcsClient::HeartbeatBatchAdded(const HeartbeatBatchTableData &heartbeat_batch) {
-    const ClientID &local_client_id = gcs_client_->client_table().GetLocalClientId();
     // Update load information provided by each heartbeat.
     // TODO(edoakes): this isn't currently used, but will be used to refresh the LRU
     // cache in the object store.
@@ -277,6 +277,7 @@ void RedisGcsClient::HeartbeatBatchAdded(const HeartbeatBatchTableData &heartbea
         for (int i = 0; i < heartbeat_data.active_object_id_size(); i++) {
             active_object_ids.insert(ObjectID::FromBinary(heartbeat_data.active_object_id(i)));
         }
+        const ClientID &client_id = ClientID::FromBinary(heartbeat_data.client_id());
         HeartbeatAdded(client_id, heartbeat_data);
     }
 

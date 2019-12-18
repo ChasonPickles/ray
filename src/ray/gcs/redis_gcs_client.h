@@ -12,6 +12,7 @@
 #include "ray/util/logging.h"
 #include "ray/common/scheduling/cluster_resource_scheduler.h"
 #include "ray/common/task/task_util.h"
+#include "ray/common/task/scheduling_resources.h"
 
 namespace ray {
 
