@@ -82,6 +82,8 @@ class RAY_EXPORT RedisGcsClient : public GcsClient {
   Status GetExport(const std::string &job_id, int64_t export_index,
                    const GetExportCallback &done_callback);
   void SubmitTask(TaskSpecification task);
+  void HeartbeatAdded(const ClientID &client_id, const HeartbeatTableData &heartbeat_data);
+  void HeartbeatBatchAdded(const HeartbeatBatchTableData &heartbeat_batch);
 
   std::vector<std::shared_ptr<RedisContext>> shard_contexts() { return shard_contexts_; }
   std::shared_ptr<RedisContext> primary_context() { return primary_context_; }

@@ -234,8 +234,53 @@ ActorCheckpointIdTable &RedisGcsClient::actor_checkpoint_id_table() {
 DynamicResourceTable &RedisGcsClient::resource_table() { return *resource_table_; }
 
 void SubmitTask(TaskSpecification task) {
-    //RayLogLevel rayLogLevel = RayLogLevel::DEBUG;
     RAY_LOG(DEBUG) << task.DebugString() << " stupid" ;
+}
+
+void RedisGcsClient::HeartbeatAdded(const ClientID &client_id,
+                                 const HeartbeatTableData &heartbeat_data) {
+
+    ResourceSet remote_total(VectorFromProtobuf(heartbeat_data.resources_total_label()),
+                             VectorFromProtobuf(heartbeat_data.resources_total_capacity()));
+    ResourceSet remote_available(
+            VectorFromProtobuf(heartbeat_data.resources_available_label()),
+            VectorFromProtobuf(heartbeat_data.resources_available_capacity()));
+    ResourceSet remote_load(VectorFromProtobuf(heartbeat_data.resource_load_label()),
+                            VectorFromProtobuf(heartbeat_data.resource_load_capacity()));
+
+    // Locate the client id in remote client table and update available resources based on
+    // the received heartbeat information.
+    auto it = cluster_resource_map_.find(client_id);
+    SchedulingResources &remote_resources;
+    if (it == cluster_resource_map_.end()) {
+        // Haven't received the client registration for this client yet, skip this heartbeat.
+        RAY_LOG(INFO) << "[HeartbeatAdded]: received heartbeat from unknown client id "
+                      << client_id;
+        cluster_resource_map_[client_id] = new SchedulingResources();
+        remote_resources = cluster_resource_map_[client_id];
+    }
+    else{
+        remote_resources = it->second;
+    }
+
+    remote_resources.SetAvailableResources(std::move(remote_available));
+    remote_resources.SetLoadResources(std::move(remote_load));
+}
+
+void RedisGcsClient::HeartbeatBatchAdded(const HeartbeatBatchTableData &heartbeat_batch) {
+    const ClientID &local_client_id = gcs_client_->client_table().GetLocalClientId();
+    // Update load information provided by each heartbeat.
+    // TODO(edoakes): this isn't currently used, but will be used to refresh the LRU
+    // cache in the object store.
+    std::unordered_set<ObjectID> active_object_ids;
+    for (const auto &heartbeat_data : heartbeat_batch.batch()) {
+        for (int i = 0; i < heartbeat_data.active_object_id_size(); i++) {
+            active_object_ids.insert(ObjectID::FromBinary(heartbeat_data.active_object_id(i)));
+        }
+        HeartbeatAdded(client_id, heartbeat_data);
+    }
+
+    RAY_LOG(DEBUG) << "Total active object IDs received: " << active_object_ids.size();
 }
 
 }  // namespace gcs
