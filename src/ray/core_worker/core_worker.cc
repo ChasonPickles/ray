@@ -653,6 +653,8 @@ Status CoreWorker::SubmitTask(const RayFunction &function,
     return direct_task_submitter_->SubmitTask(task_spec);
   } else {
     PinObjectReferences(task_spec, TaskTransportType::RAYLET);
+    //TODO change this to send to gcsclient
+    (void) gcs_client_->SubmitTask(task_spec);
     return local_raylet_client_->SubmitTask(task_spec);
   }
 }
@@ -696,6 +698,7 @@ Status CoreWorker::CreateActor(const RayFunction &function,
     return direct_task_submitter_->SubmitTask(task_spec);
   } else {
     PinObjectReferences(task_spec, TaskTransportType::RAYLET);
+    (void) gcs_client_->SubmitTask(task_spec);
     return local_raylet_client_->SubmitTask(task_spec);
   }
 }
@@ -746,6 +749,8 @@ Status CoreWorker::SubmitActorTask(const ActorID &actor_id, const RayFunction &f
     }
   } else {
     PinObjectReferences(task_spec, TaskTransportType::RAYLET);
+    //TODO change to send to gcs
+    (void) gcs_client_->SubmitTask(task_spec);
     RAY_CHECK_OK(local_raylet_client_->SubmitTask(task_spec));
   }
   return status;

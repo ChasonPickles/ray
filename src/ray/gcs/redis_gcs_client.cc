@@ -233,6 +233,11 @@ ActorCheckpointIdTable &RedisGcsClient::actor_checkpoint_id_table() {
 
 DynamicResourceTable &RedisGcsClient::resource_table() { return *resource_table_; }
 
+void SubmitTask(TaskSpecification task) {
+    //RayLogLevel rayLogLevel = RayLogLevel::DEBUG;
+    RAY_LOG(DEBUG) << task.DebugString() << " stupid" ;
+}
+
 }  // namespace gcs
 
 }  // namespace ray

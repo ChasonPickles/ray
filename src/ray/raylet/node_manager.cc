@@ -666,7 +666,7 @@ void NodeManager::HeartbeatAdded(const ClientID &client_id,
       VectorFromProtobuf(heartbeat_data.resources_available_capacity()));
   ResourceSet remote_load(VectorFromProtobuf(heartbeat_data.resource_load_label()),
                           VectorFromProtobuf(heartbeat_data.resource_load_capacity()));
-  // TODO(atumanov): assert that the load is a non-empty ResourceSet.
+
   remote_resources.SetAvailableResources(std::move(remote_available));
   // Extract the load information and save it locally.
   remote_resources.SetLoadResources(std::move(remote_load));

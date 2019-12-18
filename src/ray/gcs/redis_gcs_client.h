@@ -10,6 +10,8 @@
 #include "ray/gcs/gcs_client.h"
 #include "ray/gcs/tables.h"
 #include "ray/util/logging.h"
+#include "ray/common/scheduling/cluster_resource_scheduler.h"
+#include "ray/common/task/task_util.h"
 
 namespace ray {
 
@@ -66,6 +68,7 @@ class RAY_EXPORT RedisGcsClient : public GcsClient {
   ActorCheckpointTable &actor_checkpoint_table();
   ActorCheckpointIdTable &actor_checkpoint_id_table();
   DynamicResourceTable &resource_table();
+  std::unordered_map<ClientID, SchedulingResources> cluster_resource_map_;
   /// Used only for direct calls. Tasks submitted through the raylet transport
   /// should use Actors(), which has a requirement on the order in which
   /// entries can be appended to the log.
@@ -78,6 +81,7 @@ class RAY_EXPORT RedisGcsClient : public GcsClient {
   Status AddExport(const std::string &job_id, std::string &export_data);
   Status GetExport(const std::string &job_id, int64_t export_index,
                    const GetExportCallback &done_callback);
+  void SubmitTask(TaskSpecification task);
 
   std::vector<std::shared_ptr<RedisContext>> shard_contexts() { return shard_contexts_; }
   std::shared_ptr<RedisContext> primary_context() { return primary_context_; }
