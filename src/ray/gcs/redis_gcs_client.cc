@@ -79,10 +79,36 @@ RedisGcsClient::RedisGcsClient(const GcsClientOptions &options) : GcsClient(opti
 #else
   command_type_ = CommandType::kRegular;
 #endif
+    const auto &heartbeat_batch_added =
+            [this](gcs::RedisGcsClient *client, const ClientID &id,
+                   const HeartbeatBatchTableData &heartbeat_batch) {
+                HeartbeatBatchAdded(heartbeat_batch);
+            };
+    //TODO error handling if subscribe unsuccessful
+    (void) heartbeat_batch_table_->Subscribe(
+            JobID::Nil(), ClientID::Nil(), heartbeat_batch_added,
+            /*subscribe_callback=*/nullptr,
+            /*done_callback=*/nullptr);
+
 }
 
 RedisGcsClient::RedisGcsClient(const GcsClientOptions &options, CommandType command_type)
-    : GcsClient(options), command_type_(command_type) {}
+    : GcsClient(options), command_type_(command_type) {
+
+const auto &heartbeat_batch_added =
+        [this](gcs::RedisGcsClient *client, const ClientID &id,
+               const HeartbeatBatchTableData &heartbeat_batch) {
+            HeartbeatBatchAdded(heartbeat_batch);
+        };
+    //TODO error handling if subscribe unsuccessful
+
+    (void) heartbeat_batch_table_->Subscribe(
+        JobID::Nil(), ClientID::Nil(), heartbeat_batch_added,
+        /*subscribe_callback=*/nullptr,
+        /*done_callback=*/nullptr);
+
+
+}
 
 Status RedisGcsClient::Connect(boost::asio::io_service &io_service) {
   RAY_CHECK(!is_connected_);
@@ -267,6 +293,7 @@ void RedisGcsClient::HeartbeatAdded(const ClientID &client_id,
         remote_resources.SetLoadResources(std::move(remote_load));
     }
 }
+
 
 void RedisGcsClient::HeartbeatBatchAdded(const HeartbeatBatchTableData &heartbeat_batch) {
     // Update load information provided by each heartbeat.
